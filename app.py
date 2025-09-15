@@ -379,4 +379,3 @@ with col_right:
         st.error("### Resumen de problemas:")
         for error in errores_activos:
             st.write(f"• {error}")
-
