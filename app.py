@@ -78,8 +78,8 @@ if "errores" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "dark" 
 
-if "needs_rerun" not in st.session_state:
-    st.session_state.needs_rerun = False
+if "selectbox_keys" not in st.session_state:
+    st.session_state.selectbox_keys = {f"Ronda {i}": 0 for i in range(1, 9)}
 
 # =======================
 # CSS dinámico basado en tema
@@ -282,7 +282,7 @@ with header_col2:
     new_theme = st.selectbox("🎨 Tema", ["dark", "light"], index=0 if st.session_state.theme=="dark" else 1, key="theme_header")
     if new_theme != st.session_state.theme:
         st.session_state.theme = new_theme
-        st.session_state.needs_rerun = True
+        st.rerun()
 
 st.markdown("### 🏆 Arma tu equipo ideal y controla tu presupuesto")
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
@@ -310,28 +310,31 @@ with col_right:
             st.session_state.seleccionados[ronda] = None
             st.session_state.errores[ronda] = ""
             st.session_state[f"eliminar_{ronda}"] = False
-            st.session_state.needs_rerun = True
+            st.session_state.selectbox_keys[ronda] += 1  # Forzar actualización del selectbox
+            st.rerun()
     
     # Procesar selecciones
     for ronda in rondas:
-        if f"select_{ronda}" in st.session_state:
-            jugador_seleccionado = st.session_state[f"select_{ronda}"]
+        selectbox_key = f"select_{ronda}_{st.session_state.selectbox_keys[ronda]}"
+        if selectbox_key in st.session_state:
+            jugador_seleccionado = st.session_state[selectbox_key]
             jugador_actual = st.session_state.seleccionados.get(ronda)
             
             # Solo procesar si la selección ha cambiado
-            if jugador_seleccionado != jugador_actual and jugador_seleccionado != "(vacío)":
-                es_valido, mensaje_error = validar_seleccion(jugador_seleccionado, ronda)
-                
-                if es_valido:
-                    st.session_state.seleccionados[ronda] = jugador_seleccionado
+            if jugador_seleccionado != jugador_actual:
+                if jugador_seleccionado == "(vacío)":
+                    st.session_state.seleccionados[ronda] = None
                     st.session_state.errores[ronda] = ""
                 else:
-                    st.session_state.errores[ronda] = mensaje_error
-                    # Revertir a la selección anterior en el estado del selectbox
-                    if jugador_actual:
-                        st.session_state[f"select_{ronda}"] = jugador_actual
+                    es_valido, mensaje_error = validar_seleccion(jugador_seleccionado, ronda)
+                    
+                    if es_valido:
+                        st.session_state.seleccionados[ronda] = jugador_seleccionado
+                        st.session_state.errores[ronda] = ""
                     else:
-                        st.session_state[f"select_{ronda}"] = "(vacío)"
+                        st.session_state.errores[ronda] = mensaje_error
+                        # Revertir a la selección anterior
+                        st.session_state[selectbox_key] = jugador_actual if jugador_actual else "(vacío)"
     
     def render_ronda_widget(parent, ronda):
         cols = parent.columns([5, 1])
@@ -339,9 +342,8 @@ with col_right:
         with cols[0]:
             # Get the current selection from session state
             current_selection = st.session_state.seleccionados.get(ronda)
-            idx = safe_index_of(current_selection, names)
             
-            # Crear un selectbox
+            # Crear un selectbox con clave única que cambia al eliminar
             options = ["(vacío)"] + names
             default_index = 0 if current_selection is None else options.index(current_selection)
             
@@ -349,7 +351,7 @@ with col_right:
                 f"{ronda}",
                 options=options,
                 index=default_index,
-                key=f"select_{ronda}"
+                key=f"select_{ronda}_{st.session_state.selectbox_keys[ronda]}"
             )
             
             # Mostrar mensaje de error si existe
@@ -361,7 +363,6 @@ with col_right:
             st.markdown('<div class="delete-btn-container">', unsafe_allow_html=True)
             if st.button("❌", key=f"btn_del_{ronda}"):
                 st.session_state[f"eliminar_{ronda}"] = True
-                st.session_state.needs_rerun = True
             st.markdown('</div>', unsafe_allow_html=True)
     
     # Renderizar todas las rondas
@@ -378,9 +379,4 @@ with col_right:
         st.error("### Resumen de problemas:")
         for error in errores_activos:
             st.write(f"• {error}")
-
-# Forzar rerun si es necesario
-if st.session_state.needs_rerun:
-    st.session_state.needs_rerun = False
-    st.rerun()
 
