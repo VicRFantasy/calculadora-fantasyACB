@@ -238,46 +238,40 @@ with col_right:
     names = df["Nombre"].tolist()
 
     def render_ronda_widget(parent, ronda):
-    cols = parent.columns([5, 1])
-    key_sel = f"sel_{ronda.replace(' ', '_')}"
-    key_del = f"del_{ronda.replace(' ', '_')}"
-    clear_key = f"clear_{ronda.replace(' ', '_')}"
+        cols = parent.columns([5, 1])
+        key_sel = f"sel_{ronda.replace(' ', '_')}"
+        key_del = f"del_{ronda.replace(' ', '_')}"
+        clear_key = f"clear_{ronda.replace(' ', '_')}"
 
-    # Si hay una bandera de "clear" activa la usamos para fijar el valor antes de crear el widget
-    if st.session_state.get(clear_key, False):
-        # establecer el valor del widget ANTES de que st.selectbox lo cree en esta ejecución
-        st.session_state[key_sel] = "(vacío)"
-        st.session_state[clear_key] = False
-        # también asegurarnos de que nuestro modelo esté en None
-        st.session_state.seleccionados[ronda] = None
-
-    # Si el key del select no existe todavía, inicializarlo con el valor actual en seleccionados
-    if key_sel not in st.session_state:
-        st.session_state[key_sel] = st.session_state.seleccionados.get(ronda) or "(vacío)"
-
-    # Callback para sincronizar la selección del widget con tu dict 'seleccionados'
-    def _on_change(k=key_sel, r=ronda):
-        val = st.session_state.get(k)
-        st.session_state.seleccionados[r] = None if val == "(vacío)" else val
-
-    with cols[0]:
-        st.selectbox(
-            f"{ronda}",
-            options=["(vacío)"] + names,
-            key=key_sel,
-            on_change=_on_change
-        )
-
-    with cols[1]:
-        st.markdown('<div style="padding-top: 1.7rem;">', unsafe_allow_html=True)
-        if st.button("❌", key=key_del):
-            # No asignes st.session_state[key_sel] aquí (está prohibido después de crear el widget).
-            # En su lugar, marcamos la bandera y forzamos rerun: en la siguiente ejecución
-            # la bandera hará que se inicialice el widget en "(vacío)" antes de su creación.
+        # Si hay una bandera de "clear" activa la usamos para fijar el valor antes de crear el widget
+        if st.session_state.get(clear_key, False):
+            st.session_state[key_sel] = "(vacío)"
+            st.session_state[clear_key] = False
             st.session_state.seleccionados[ronda] = None
-            st.session_state[clear_key] = True
-            st.experimental_rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+
+        if key_sel not in st.session_state:
+            st.session_state[key_sel] = st.session_state.seleccionados.get(ronda) or "(vacío)"
+
+        def _on_change(k=key_sel, r=ronda):
+            val = st.session_state.get(k)
+            st.session_state.seleccionados[r] = None if val == "(vacío)" else val
+
+        with cols[0]:
+            st.selectbox(
+                f"{ronda}",
+                options=["(vacío)"] + names,
+                key=key_sel,
+                on_change=_on_change
+            )
+
+        with cols[1]:
+            st.markdown('<div style="padding-top: 1.7rem;">', unsafe_allow_html=True)
+            if st.button("❌", key=key_del):
+                st.session_state.seleccionados[ronda] = None
+                st.session_state[clear_key] = True
+                st.experimental_rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
 
     # Render de las 8 rondas (4 + 4)
     for r in rondas[:4]:
