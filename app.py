@@ -260,7 +260,7 @@ with col_right:
                 st.session_state.seleccionados[ronda] = None
                 st.session_state.widget_counter += 1
                 st.rerun()
-        s   t.markdown('</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
 
 
     for r in rondas[:4]:
