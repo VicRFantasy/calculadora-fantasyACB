@@ -239,10 +239,10 @@ with col_right:
 
     def render_ronda_widget(parent, ronda):
         cols = parent.columns([5, 1])
-        key_sel = f"sel_{ronda}_{st.session_state.widget_counter}"
-        key_del = f"del_{ronda}_{st.session_state.widget_counter}"
+        key_sel = f"sel_{ronda}"  # key fija solo por ronda
+        key_del = f"del_{ronda}_{st.session_state.widget_counter}"  # botón sí puede usar widget_counter
+
         with cols[0]:
-            # Get the current selection from session state
             current_selection = st.session_state.seleccionados.get(ronda)
             idx = safe_index_of(current_selection, names)
             jugador = st.selectbox(
@@ -251,24 +251,17 @@ with col_right:
                 index=idx,
                 key=key_sel
             )
-            # Always update selection immediately
-            new_selection = None if jugador == "(vacío)" else jugador
-            st.session_state.seleccionados[ronda] = new_selection
-            st.session_state.widget_counter += 1
+            # Actualizar selección inmediatamente
+            st.session_state.seleccionados[ronda] = None if jugador == "(vacío)" else jugador
 
         with cols[1]:
-            # Perfect X button alignment with CSS targeting
-            st.markdown("""<style>
-                div[data-testid="column"] > div > div > div > button {
-                    height: 2.4rem !important;
-                    margin-top: 0.2rem !important;
-                    padding: 0.25rem 0.5rem !important;
-                }
-            </style>""", unsafe_allow_html=True)
+            st.markdown('<div style="padding-top: 1.7rem;">', unsafe_allow_html=True)
             if st.button("❌", key=key_del):
                 st.session_state.seleccionados[ronda] = None
                 st.session_state.widget_counter += 1
                 st.rerun()
+        s   t.markdown('</div>', unsafe_allow_html=True)
+
 
     for r in rondas[:4]:
         render_ronda_widget(right_col1, r)
