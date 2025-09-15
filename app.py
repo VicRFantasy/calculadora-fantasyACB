@@ -254,6 +254,8 @@ with col_right:
             # Always update selection immediately
             new_selection = None if jugador == "(vacío)" else jugador
             st.session_state.seleccionados[ronda] = new_selection
+            st.session_state.widget_counter += 1
+
         with cols[1]:
             # Perfect X button alignment with CSS targeting
             st.markdown("""<style>
