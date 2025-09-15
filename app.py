@@ -239,29 +239,44 @@ with col_right:
 
     def render_ronda_widget(parent, ronda):
         cols = parent.columns([5, 1])
-        key_sel = f"sel_{ronda}"  # key fija solo por ronda
-        key_del = f"del_{ronda}_{st.session_state.widget_counter}"  # botón sí puede usar widget_counter
+        # keys estables (sin widget_counter) --- reemplazamos espacios por guiones bajos para seguridad
+        key_sel = f"sel_{ronda.replace(' ', '_')}"
+        key_del = f"del_{ronda.replace(' ', '_')}"
+
+        # Inicializar el key del select con el valor actual (o "(vacío)")
+        if key_sel not in st.session_state:
+            st.session_state[key_sel] = st.session_state.seleccionados.get(ronda) or "(vacío)"
+
+        # Callback que sincroniza el selectbox con st.session_state.seleccionados
+        def _on_change(r=ronda, k=key_sel):
+            val = st.session_state.get(k)
+            st.session_state.seleccionados[r] = None if val == "(vacío)" else val
 
         with cols[0]:
-            current_selection = st.session_state.seleccionados.get(ronda)
-            idx = safe_index_of(current_selection, names)
-            jugador = st.selectbox(
+            # El selectbox usa el key que está en session_state; on_change sincroniza seleccionados
+            st.selectbox(
                 f"{ronda}",
                 options=["(vacío)"] + names,
-                index=idx,
-                key=key_sel
+                key=key_sel,
+                on_change=_on_change
             )
-            # Actualizar selección inmediatamente
-            st.session_state.seleccionados[ronda] = None if jugador == "(vacío)" else jugador
 
         with cols[1]:
+            # Botón X: al pulsar, dejamos el select en "(vacío)" y limpiamos seleccionados
             st.markdown('<div style="padding-top: 1.7rem;">', unsafe_allow_html=True)
             if st.button("❌", key=key_del):
+                # Poner el select visualmente en vacío y sincronizar el roster
+                st.session_state[key_sel] = "(vacío)"
                 st.session_state.seleccionados[ronda] = None
-                st.session_state.widget_counter += 1
-                st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+                # Rerun para forzar que todo se actualice inmediatamente
+                st.experimental_rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
+    # Render de las 8 rondas (4 + 4)
+    for r in rondas[:4]:
+        render_ronda_widget(right_col1, r)
+    for r in rondas[4:]:
+        render_ronda_widget(right_col2, r)
 
     for r in rondas[:4]:
         render_ronda_widget(right_col1, r)
