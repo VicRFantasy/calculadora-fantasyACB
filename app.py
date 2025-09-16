@@ -281,7 +281,7 @@ def render_budget_and_team(container):
 # Theme toggle en la cabecera (visible en todos los dispositivos) - reduced spacing
 header_col1, header_col2 = st.columns([3, 1])
 with header_col1:
-    st.markdown("""<h1 style="font-weight:700; background: linear-gradient(135deg, #60A5FA, #34D399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-top: -1rem;">Calculadora The Fantasy Basket ACB</h1>""", unsafe_allow_html=True)
+    st.markdown("""<h1 style="font-weight:700; background: linear-gradient(135deg, #60A5FA, #34D399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-top: -1rem;">Calculadora ACB</h1>""", unsafe_allow_html=True)
 with header_col2:
     new_theme = st.selectbox("🎨 Tema", ["dark", "light"], index=0 if st.session_state.theme=="dark" else 1, key="theme_header")
     if new_theme != st.session_state.theme:
