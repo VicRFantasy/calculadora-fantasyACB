@@ -5,7 +5,7 @@ import re
 # =======================
 # Configuración de la página
 # =======================
-st.set_page_config(layout="wide", page_title="Fantasy ACB", page_icon="🏀", initial_sidebar_state="collapsed")
+st.set_page_config(layout="wide", page_title="The Fantasy Basket", page_icon="🏀", initial_sidebar_state="collapsed")
 
 # =======================
 # Cargar jugadores desde Excel
