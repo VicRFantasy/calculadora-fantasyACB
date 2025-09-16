@@ -88,18 +88,23 @@ if st.session_state.theme == "dark":
     divider_color = "rgba(255,255,255,0.1)"
     progress_bg = "#1a1a1a"
     progress_border = "rgba(255,255,255,0.1)"
+    ronda_label_color = "#ffffff"
 else:
     bg_color = "#ffffff"
     text_color = "#000000"
     divider_color = "rgba(0,0,0,0.08)"
     progress_bg = "#e6f4ff"
     progress_border = "rgba(96,165,250,0.15)"
-    
-# Generar CSS dinámico para rondas 1–8
-css_rondas = "\n".join([
+    ronda_label_color = "#000000"
+
+# Intentamos crear reglas específicas para Ronda 1..8 (si existen aria-labels),
+# y también añadimos un fallback que colorea los labels de TODOS los selectboxes.
+css_rondas_specific = "\n".join([
     f'div[data-testid="stSelectbox"][aria-label="Ronda {i}"] label {{ color: {ronda_label_color} !important; font-weight: 600; }}'
     for i in range(1, 9)
 ])
+
+    
 
 st.markdown(f"""
 <style>
@@ -316,6 +321,7 @@ with col_right:
         render_ronda_widget(right_col1, r)
     for r in rondas[4:]:
         render_ronda_widget(right_col2, r)
+
 
 
 
