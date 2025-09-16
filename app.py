@@ -23,14 +23,14 @@ def parse_price_to_euros(val):
     if pd.isna(val):
         return 0
     if isinstance(val, (int, float)):
-        # Si viene un número grande en euros -> directo
+        # Si viene un número -> analizamos el rango
         try:
             v = float(val)
-            if v > 10000:  # euros completos
+            if v > 100000:  # probablemente ya en euros completos
                 return int(round(v))
             else:
-                # Si es un número pequeño, asumimos que está en millones
-                return int(round(v * 1_000_000))
+                # números pequeños están en miles de euros (950 = 950,000€)
+                return int(round(v * 1000))
         except:
             return 0
     s = str(val).strip()
@@ -55,11 +55,11 @@ def parse_price_to_euros(val):
         euros = float(s)
     except:
         return 0
-    # si la cifra es grande (>10000) tratamos como euros completos
-    if euros > 10000:
+    # si la cifra es grande (>100000) tratamos como euros completos
+    if euros > 100000:
         return int(round(euros))
-    # si no, asumimos que está en millones y convertimos
-    return int(round(euros * 1_000_000))
+    # si no, asumimos que está en miles y convertimos (950 = 950,000€)
+    return int(round(euros * 1000))
 
 df['Precio_Euros'] = df['Precio'].apply(parse_price_to_euros)
 
@@ -104,8 +104,6 @@ css_rondas_specific = "\n".join([
     for i in range(1, 9)
 ])
 
-    
-
 st.markdown(f"""
 <style>
 /* Mostrar/ocultar según pantalla */
@@ -121,12 +119,42 @@ st.markdown(f"""
   .stSelectbox{{margin-bottom: 0.5rem !important;}}
 }}
 
+/* Fix white spaces and background consistency */
+html, body, #root, .stApp, [data-testid="stAppViewContainer"], 
+[data-testid="stHeader"], [data-testid="stToolbar"], 
+.main, .main .block-container {{
+    background-color: {bg_color} !important;
+    color: {text_color} !important;
+}}
+
+/* Hide Streamlit's default header and toolbar to remove fixed menu */
+[data-testid="stHeader"], 
+[data-testid="stToolbar"],
+header[data-testid="stHeader"] {{
+    display: none !important;
+    visibility: hidden !important;
+}}
+
+/* Remove top padding that was compensating for the header */
+.main .block-container {{
+    padding-top: 1rem !important;
+}}
+
 /* Tema dinámico - aplicar al contenedor principal */
 .stApp, [data-testid="stAppViewContainer"] {{
     background-color: {bg_color} !important;
     color: {text_color} !important;
 }}
 .main-bg{{background-color: {bg_color}; color: {text_color};}}
+
+/* Selectbox label styling for rounds */
+{css_rondas_specific}
+
+/* Fallback for all selectbox labels */
+.stSelectbox label {{
+    color: {ronda_label_color} !important;
+    font-weight: 600 !important;
+}}
 
 /* Divider */
 .divider{{height:1px;background:linear-gradient(90deg,transparent,{divider_color},transparent);margin:10px 0}}
@@ -321,6 +349,13 @@ with col_right:
         render_ronda_widget(right_col1, r)
     for r in rondas[4:]:
         render_ronda_widget(right_col2, r)
+
+
+
+
+
+
+
 
 
 
