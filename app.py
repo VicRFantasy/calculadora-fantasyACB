@@ -94,6 +94,12 @@ else:
     divider_color = "rgba(0,0,0,0.08)"
     progress_bg = "#e6f4ff"
     progress_border = "rgba(96,165,250,0.15)"
+    
+# Generar CSS dinámico para rondas 1–8
+css_rondas = "\n".join([
+    f'div[data-testid="stSelectbox"][aria-label="Ronda {i}"] label {{ color: {ronda_label_color} !important; font-weight: 600; }}'
+    for i in range(1, 9)
+])
 
 st.markdown(f"""
 <style>
@@ -310,9 +316,6 @@ with col_right:
         render_ronda_widget(right_col1, r)
     for r in rondas[4:]:
         render_ronda_widget(right_col2, r)
-
-
-
 
 
 
